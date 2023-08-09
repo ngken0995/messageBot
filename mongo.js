@@ -1,29 +1,60 @@
 const {MongoClient} = require("mongodb");
+let yourModule={};
 
-async function main() {
+yourModule.mongodbInsert=async(jobTitle,link,company,datetime)=>{
     const uri = "mongodb+srv://user:user@cluster0.iexegjm.mongodb.net/?retryWrites=true&w=majority";
     const client = new MongoClient(uri);
     try {
         await client.connect();
-        await createListing(client,
+        await addListing(client,
             {
-                name: "Lovely Loft",
-                summary: "A charming loft in Paris",
-                bedrooms: 1,
-                bathrooms: 1
+                jobTitle:jobTitle, 
+                link:link, 
+                company:company, 
+                datetime:datetime,
             }
+            ,company
         );
     } catch (e) {
         console.log(e)
     } finally {
         await client.close();
     }
+    return
 }
+// async function mongodbInsert(jobTitle,link,company,datetime){
+//     const uri = "mongodb+srv://user:user@cluster0.iexegjm.mongodb.net/?retryWrites=true&w=majority";
+//     const client = new MongoClient(uri);
+//     try {
+//         await client.connect();
+//         await addListing(client,
+//             {
+//                 jobTitle:jobTitle, 
+//                 link:link, 
+//                 company:company, 
+//                 datetime:datetime,
+//             }
+//         );
+//     } catch (e) {
+//         console.log(e)
+//     } finally {
+//         await client.close();
+//     }
+//     return
+// }
 
-main().catch(console.error);
 
-async function createListing(client, newListing){
+async function addListing(client, newListing, company){
     // See https://mongodb.github.io/node-mongodb-native/3.6/api/Collection.html#insertOne for the insertOne() docs
-    const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertOne(newListing);
-    console.log(`New listing created with the following id: ${result.insertedId}`);
+    const result = await client.db("sample_airbnb").collection("listings").replaceOne(
+        {
+          company : company
+        },
+            newListing
+           ,
+           {upsert: true}
+        )
+    console.log(`New listing created with the following id:`);
 }
+
+module.exports = yourModule;

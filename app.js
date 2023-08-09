@@ -1,7 +1,7 @@
 
 const puppeteer = require('puppeteer');
-const login = require('./login.js');
 const {getJobSearchUrl} = require('./env_variable.js');
+let yourModule = require('./mongo.js');
 
 (async () => {
 	const browser = await puppeteer.launch();
@@ -34,11 +34,15 @@ const {getJobSearchUrl} = require('./env_variable.js');
 			const company = information.querySelector(".base-search-card__subtitle").querySelector("a").innerText;
 
 			const datetime = information.querySelector(".base-search-card__metadata").querySelector('time').getAttribute('datetime');
-		
+
+
 			return {jobTitle, link, company, datetime};
 		});
 	  });
-	
+
+	await quotes.forEach((quote) => {
+		yourModule.mongodbInsert(quote.jobTitle, quote.link, quote.company, quote.datetime);
+	});
 	  // Display the quotes
 	  console.log(quotes);
 
