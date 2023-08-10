@@ -1,6 +1,5 @@
 
 const puppeteer = require('puppeteer');
-const {getJobSearchUrl} = require('./env_variable.js');
 let yourModule = require('./mongo.js');
 
 function delay(time) {
@@ -11,7 +10,7 @@ function delay(time) {
 (async () => {
 	const browser = await puppeteer.launch();
 	const page = await browser.newPage();
-
+	//Retrieve amount of new job
 	await page.goto("https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r172800&f_PP=102571732&position=23&pageNum=0");
 
 	const amountOfJob = await page.evaluate(() => {
@@ -21,7 +20,7 @@ function delay(time) {
     await console.log(amountOfJob);
 
 	let pages = await Math.floor(Number(amountOfJob)/25);
-
+	//scrape job posting
 	for (let i = 0; i < pages; i++) {
 		console.log(`page: ${i}`)
 		const page = await browser.newPage();
@@ -29,11 +28,9 @@ function delay(time) {
 
 		await delay(5000);
 		const quotes = await page.evaluate(() => {
-			// Fetch the first element with class "quote"
+
 			const baseList = document.querySelectorAll("li");
 		
-			// Fetch the sub-elements from the previously fetched quote element
-			// Get the displayed text and return it (`.innerText`)
 			return Array.from(baseList).flatMap((base) => {
 				try {
 					const baseCard = base.querySelector(".base-card");
