@@ -54,7 +54,6 @@ async function addListing(client, newListing, company){
             ,
             {upsert: true}
         )
-    console.log(`New listing created with the following id:`);
 }
 
 module.exports = yourModule;
