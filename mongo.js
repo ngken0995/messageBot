@@ -48,11 +48,11 @@ async function addListing(client, newListing, company){
     // See https://mongodb.github.io/node-mongodb-native/3.6/api/Collection.html#insertOne for the insertOne() docs
     const result = await client.db("sample_airbnb").collection("listings").replaceOne(
         {
-          company : company
+            company : company
         },
             newListing
-           ,
-           {upsert: true}
+            ,
+            {upsert: true}
         )
     console.log(`New listing created with the following id:`);
 }
