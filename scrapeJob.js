@@ -11,7 +11,7 @@ function delay(time) {
 	const browser = await puppeteer.launch();
 	const page = await browser.newPage();
 	//Retrieve amount of new job
-	await page.goto('https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r172800&f_PP=102571732&position=23&pageNum=0');
+	await page.goto('https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=0');
 
 	const amountOfJob = await page.evaluate(() => {
         const baseCard = document.querySelector('.base-serp-page').querySelector('.base-serp-page__content').querySelector('#main-content').querySelector('.results-context-header').querySelector('.results-context-header__context').querySelector('span').innerText;
@@ -24,7 +24,7 @@ function delay(time) {
 	for (let i = 0; i < pages; i++) {
 		console.log(`page: ${i}`)
 		const page = await browser.newPage();
-		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?distance=25&f_PP=102571732%2C104361728&f_TPR=r172800&geoId=90000070&keywords=Software%2BEngineer&start=${i*25}`);
+		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?distance=25&f_PP=102571732%2C104361728&f_TPR=r432000&geoId=90000070&keywords=Software%2BEngineer&start=${i*25}`);
 
 		await delay(5000);
 		const quotes = await page.evaluate(() => {

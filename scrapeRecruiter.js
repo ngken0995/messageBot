@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const {getUsername, getPassword} = require('./envVariable.js');
+const {getLinkedinUsername, getLinkedinPassword} = require('./envVariable.js');
 const proxy = '2.56.119.93';
 function delay(time) {
 	return new Promise(function(resolve) { 
@@ -11,16 +11,18 @@ function delay(time) {
 	const page = await browser.newPage();
 	await page.goto('https://www.linkedin.com');
     await delay(4000);
+    //login session
     const usernameInput = await page.$("#session_key");
 
-    await usernameInput.type(getUsername());
+    await usernameInput.type(getLinkedinUsername());
 
     const passwordInput = await page.$("#session_password");
 
-    await passwordInput.type(getPassword());
+    await passwordInput.type(getLinkedinPassword());
     const btn = await page.$('[data-id="sign-in-form__submit-btn"]');
     await btn.click();
     await delay(30000);
+
     await page.screenshot({
         path: 'shot.jpg'
     });
