@@ -7,6 +7,7 @@ function delay(time) {
 		setTimeout(resolve, time)
 	});
 }
+
 (async () => {
 	const browser = await puppeteer.launch();
 	const page = await browser.newPage();
@@ -61,3 +62,4 @@ function delay(time) {
 
 	await browser.close();
 })();
+module.exports = { delay }
