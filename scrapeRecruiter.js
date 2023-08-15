@@ -10,7 +10,7 @@ function delay(time) {
 	const browser = await puppeteer.launch({headless: false});
 	const page = await browser.newPage();
 	await page.goto('https://www.linkedin.com');
-    await delay(4000);
+    await delay(10000);
     //login session
     const usernameInput = await page.$("#session_key");
 
@@ -27,50 +27,81 @@ function delay(time) {
     //look up company
     const db = await yourModule.mongodbFind();
     const lists = await db.lists.collection('listings').find();
+    //To Do: figure out how to loop through 5 unvisited companies.
     let link = '';
     for await (const doc of lists) {
         link = doc.link;
     }
 
-	await page.goto(link);
-    await delay(4000);
-    //await page.click('img[class="ivm-view-attr__img--centered EntityPhoto-square-3   evi-image lazy-image ember-view"]');
-    const companyUrl = await page.evaluate(() => {
-        const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
+	await page.goto('https://www.linkedin.com/in/donald-rose-09415a117?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAB0IVPABzaOpTkPJzm-RetV7QMTcsqNCFsg');
+    // await delay(4000);
+    // const companyUrl = await page.evaluate(() => {
+    //     const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
 
-        return baseList.querySelector('a').getAttribute('href');
+    //     return baseList.querySelector('a').getAttribute('href');
                 
-    });
+    // });
 
 
-    await page.goto(companyUrl);
-    const url = await page.url();
-    await page.goto(url +'people');
+    // await page.goto(companyUrl);
+    // let url = await page.url();
+    // await delay(10000);
+    // //revise url
+    // if (url.includes("/life")){
+    //     url = url.split("/life")[0];
+    // }
+    // console.log(url)
+    // await page.goto(url +'/people');
+
+    // await delay(10000);
+
+    // const searchEmployeeByCategory = await page.$('[id="people-search-keywords"]');
+    // await searchEmployeeByCategory.click();
+
+    // await searchEmployeeByCategory.type('recruiter');
+
+    // await page.keyboard.press('Enter');
+
+    // await delay(5000);
+
+    // const data = await page.evaluate(() => {
+    //     const tds = Array.from(document.querySelectorAll('li'))
+    //     return tds.flatMap(td => {
+
+    //         try{
+    //             var txt = td.querySelector('div').querySelector('section').querySelector('div').querySelector('div').querySelector('div').querySelector('a').getAttribute('href');
+    //             return {txt}
+    //         } catch {
+    //             return [];
+    //         }
+    //     });
+    // });
+
+    //connect and send message
+    //let firstPerson = data[0];
 
     await delay(10000);
-
-    const searchEmployeeByCategory = await page.$('[id="people-search-keywords"]');
-    await searchEmployeeByCategory.click();
-
-    await searchEmployeeByCategory.type('recruiter');
-
-    await page.keyboard.press('Enter');
-
-    const data = await page.evaluate(() => {
-        const tds = Array.from(document.querySelectorAll('li'))
-        return tds.map(td => {
-           var txt = td.innerHTML;
-           return txt.replace(/<a [^>]+>[^<]*<\/a>/g, '').trim();
-        });
+     const fullName = await page.evaluate(() => {
+        return document.querySelector('h1').innerText;
+                
     });
-  
+    console.log(fullName)
+    // await page.waitForSelector(`[class="artdeco-button__icon"]`)
+    // await page.click(`[class="artdeco-button__icon"]`)
+    // const connectBtn = await page.$(`[aria-label="Invite ${fullName} to connect"]`);
+    // await connectBtn.click();
+    await page.click('div.pvs-profile-actions > button')
+    await page.click('[aria-label="Add a note"]')
+
+
+    await page.type('[name="message"]',"Hello");
+    await page.click('[aria-label="Send now"]')
+
     
     await delay(10000);
     await page.screenshot({
         path: 'shot.jpg'
     });
-    console.log(quotes)
-
     await db.client.close();
     await browser.close();
 
