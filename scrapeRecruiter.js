@@ -7,10 +7,10 @@ function delay(time) {
 	});
 }
 (async () => {
-	const browser = await puppeteer.launch({headless: false});
+	const browser = await puppeteer.launch({headless: false,defaultViewport: null});
 	const page = await browser.newPage();
 	await page.goto('https://www.linkedin.com');
-    await delay(10000);
+    await delay(5000);
     //login session
     const usernameInput = await page.$("#session_key");
 
@@ -22,7 +22,7 @@ function delay(time) {
     const btn = await page.$('[data-id="sign-in-form__submit-btn"]');
     await btn.click();
 
-    await delay(20000);
+    await delay(15000);
     
     //look up company
     const db = await yourModule.mongodbFind();
@@ -33,7 +33,7 @@ function delay(time) {
         link = doc.link;
     }
 
-	await page.goto('https://www.linkedin.com/in/donald-rose-09415a117?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAB0IVPABzaOpTkPJzm-RetV7QMTcsqNCFsg');
+	await page.goto('https://www.linkedin.com/in/jordancutler1/');
     // await delay(4000);
     // const companyUrl = await page.evaluate(() => {
     //     const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
@@ -80,7 +80,7 @@ function delay(time) {
     //connect and send message
     //let firstPerson = data[0];
 
-    await delay(10000);
+    await delay(5000);
      const fullName = await page.evaluate(() => {
         return document.querySelector('h1').innerText;
                 
@@ -90,6 +90,32 @@ function delay(time) {
     // await page.click(`[class="artdeco-button__icon"]`)
     // const connectBtn = await page.$(`[aria-label="Invite ${fullName} to connect"]`);
     // await connectBtn.click();
+
+    let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
+
+    if (v.toLowerCase().includes('follow')){
+        //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+
+        await delay(5000);
+        // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
+        // console.log(b)
+
+        // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
+        const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
+
+        const lastItem = elements[elements.length - 1]
+
+        lastItem.click()
+
+    }else {
+        await page.click('div.pvs-profile-actions > button')
+
+    }
     await page.click('div.pvs-profile-actions > button')
     await page.click('[aria-label="Add a note"]')
 
