@@ -42,7 +42,7 @@ function delay(time) {
 		
 					const datetime = information.querySelector('.base-search-card__metadata').querySelector('time').getAttribute('datetime');
 					const checkFor = ['senior', 'staff', 'sr', 'founding', 'data', 'machine', 'ai', 'java', 'c++', 'cloud', 'it', 
-										'net','lead','manager']
+										'net','lead','manager','qa','ios', 'android','data','security','office','site','business']
 		
 					const hasSome = checkFor.some(word => jobTitle.toLowerCase().includes(word))
 					if (hasSome){
@@ -55,6 +55,7 @@ function delay(time) {
 				}
 			});
 		});
+
 		await quotes.forEach((quote) => {
 			yourModule.mongodbInsert(quote.jobTitle, quote.link, quote.company, quote.datetime);
 		});

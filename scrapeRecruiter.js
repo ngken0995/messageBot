@@ -7,6 +7,100 @@ function delay(time) {
 		setTimeout(resolve, time)
 	});
 }
+
+
+
+let actions={};
+
+actions.sendMessage=async(page,companyUrl,searchName)=>{
+    await page.goto(companyUrl);
+    const companyMission = await page.evaluate(() => {
+        return document.querySelector('h1').innerText;
+            
+    });
+    if (companyMission.toLowerCase().includes('recruiting')){
+        return;
+    }
+    await utils.linkedinPeoplePage(page);
+
+    await delay(10000);
+    const searchEmployee = await page.$('[id="people-search-keywords"]');
+    await searchEmployee.click();
+
+    await searchEmployee.type(searchName);
+
+    await page.keyboard.press('Enter');
+
+    await delay(5000);    
+    
+    //collect recruiter url
+    const engineerUrls = await page.evaluate(() => {
+        const tds = Array.from(document.querySelectorAll('li'))
+        return tds.flatMap(td => {
+
+            try{
+                var txt = td.querySelector('div').querySelector('section').querySelector('div').querySelector('div').querySelector('div').querySelector('a').getAttribute('href');
+                return {txt}
+            } catch {
+                return [];
+            }
+            });
+    });
+
+    //connect and send message
+
+    await delay(5000);
+    console.log(engineerUrls);
+    for await (const url of engineerUrls) {
+        await page.goto(url.txt);
+
+    
+        const fullName = await page.evaluate(() => {
+            return document.querySelector('h1').innerText;
+                
+        });
+        console.log(fullName)
+        let firstName = fullName.split(" ")[0]
+        await delay(10000);
+
+        let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        if (v.toLowerCase().includes('connect')){
+            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
+                await page.click('div.pvs-profile-actions > button')
+
+        }else {
+            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
+            await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+
+            await delay(5000);
+            // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
+            // console.log(b)
+
+            // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
+            const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
+            for await (const element of elements) {
+                await delay(5000);
+                await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+                await delay(5000);
+
+                await element.click();
+            }
+        }
+        await page.click('[aria-label="Add a note"]')
+
+        await delay(5000);
+
+        await page.type('[name="message"]',`Hello ${firstName},\nI\'m Kenneth Ng, a software engineer and thought you might be able to connect me with the recruiter who is responsible for a Software Engineer role.\nI consider myself to be an engineer who has the skills to succeed. Would you be open to connecting me to the right person?\nBest,\nKenneth`);
+        await delay(5000);
+
+        await page.click('[aria-label="Send now"]')
+    }
+}
+
 (async () => {
 	const browser = await puppeteer.launch({headless: false});
 	const page = await browser.newPage();
@@ -58,183 +152,90 @@ function delay(time) {
             return baseList.querySelector('a').getAttribute('href');
                     
         });
+        await actions.sendMessage(page,companyUrl,'recruiter');
+        await actions.sendMessage(page,companyUrl,'software engineer');
+    //     await page.goto(companyUrl);
 
-        await page.goto(companyUrl);
+    //     await utils.linkedinPeoplePage(page);
 
-        await utils.linkedinPeoplePage(page);
-        //let url = await page.url();
-        // await delay(10000);
-        // //revise url
-        // if (url.includes("/life")){
-        //     url = url.split("/life")[0];
-        // }
-        // console.log(url)
-        // await page.goto(url +'/people');
-
-        await delay(10000);
-
-        const searchEmployeeByCategory = await page.$('[id="people-search-keywords"]');
-        await searchEmployeeByCategory.click();
+    //     await delay(10000);
+    //     const searchEmployee = await page.$('[id="people-search-keywords"]');
+    //     await searchEmployee.click();
     
-        await searchEmployeeByCategory.type('recruiter');
+    //     await searchEmployee.type('Software Engineer');
     
-        await page.keyboard.press('Enter');
+    //     await page.keyboard.press('Enter');
     
-        await delay(5000);    
+    //     await delay(5000);    
         
-        //collect recruiter url
-        const recruiterUrls = await page.evaluate(() => {
-            const tds = Array.from(document.querySelectorAll('li'))
-            return tds.flatMap(td => {
+    //     //collect recruiter url
+    //     const engineerUrls = await page.evaluate(() => {
+    //         const tds = Array.from(document.querySelectorAll('li'))
+    //         return tds.flatMap(td => {
 
-                try{
-                    var txt = td.querySelector('div').querySelector('section').querySelector('div').querySelector('div').querySelector('div').querySelector('a').getAttribute('href');
-                    return {txt}
-                } catch {
-                    return [];
-                }
-                });
-        });
+    //             try{
+    //                 var txt = td.querySelector('div').querySelector('section').querySelector('div').querySelector('div').querySelector('div').querySelector('a').getAttribute('href');
+    //                 return {txt}
+    //             } catch {
+    //                 return [];
+    //             }
+    //             });
+    //     });
 
-        //connect and send message
+    //     //connect and send message
 
-        await delay(5000);
-        console.log(recruiterUrls);
-        for await (const url of recruiterUrls) {
-            await page.goto(url.txt);
+    //     await delay(5000);
+    //     console.log(engineerUrls);
+    //     for await (const url of engineerUrls) {
+    //         await page.goto(url.txt);
 
         
-        const fullName = await page.evaluate(() => {
-            return document.querySelector('h1').innerText;
+    //     const fullName = await page.evaluate(() => {
+    //         return document.querySelector('h1').innerText;
                 
-        });
-        console.log(fullName)
-        let firstName = fullName.split(" ")[0]
+    //     });
+    //     console.log(fullName)
+    //     firstName = fullName.split(" ")[0]
+    //     await delay(10000);
 
-        await delay(10000);
+    //     let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
 
-        let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
+    //     if (v.toLowerCase().includes('connect')){
+    //         //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
+    //             await page.click('div.pvs-profile-actions > button')
 
-        if (v.toLowerCase().includes('connect')){
-            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-            await page.click('div.pvs-profile-actions > button')
+    //     }else {
+    //         //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
+    //         await page.keyboard.press('ArrowDown');
+    //         await page.keyboard.press('ArrowDown');
+    //         await page.keyboard.press('ArrowDown');
+    //         await page.keyboard.press('ArrowDown');
+    //         await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
 
-        }else {
-            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+    //         await delay(5000);
+    //         // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
+    //         // console.log(b)
 
-            await delay(5000);
-            // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
-            // console.log(b)
+    //         // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
+    //         const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
+    //         for await (const element of elements) {
+    //             await delay(5000);
+    //             await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+    //             await delay(5000);
 
-            // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
-            const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
-            for await (const element of elements) {
-                await delay(5000);
-                await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-                await delay(5000);
+    //             await element.click();
+    //         }
+    //     }
+    //     await page.click('[aria-label="Add a note"]')
 
-                await element.click();
-            }
-        }
-        await page.click('[aria-label="Add a note"]')
+    //     await delay(5000);
 
-        await delay(5000);
+    //     await page.type('[name="message"]',`Hello ${firstName},\nI recently came across your profile on LinkedIn and was amazed by your experience and background.\nWill you be available to speak with me for 10 minutes about your career path? \nThank You,\nKenneth
+    //     `);
+    //     await delay(5000);
 
-        await page.type('[name="message"]',`Hello ${firstName},\nI\'m Kenneth Ng, a software engineer and thought you might be able to connect me with the recruiter who is responsible for a Software Engineer role.\nI consider myself to be an engineer who has the skills to succeed. Would you be open to connecting me to the right person?\nBest,\nKenneth`);
-        
-        await delay(5000);
-
-        await page.click('[aria-label="Send now"]')
-        }
-
-
-        await page.goto(companyUrl);
-
-        await utils.linkedinPeoplePage(page);
-
-        await delay(10000);
-        const searchEmployee = await page.$('[id="people-search-keywords"]');
-        await searchEmployee.click();
-    
-        await searchEmployee.type('Software Engineer');
-    
-        await page.keyboard.press('Enter');
-    
-        await delay(5000);    
-        
-        //collect recruiter url
-        const engineerUrls = await page.evaluate(() => {
-            const tds = Array.from(document.querySelectorAll('li'))
-            return tds.flatMap(td => {
-
-                try{
-                    var txt = td.querySelector('div').querySelector('section').querySelector('div').querySelector('div').querySelector('div').querySelector('a').getAttribute('href');
-                    return {txt}
-                } catch {
-                    return [];
-                }
-                });
-        });
-
-        //connect and send message
-
-        await delay(5000);
-        console.log(engineerUrls);
-        for await (const url of engineerUrls) {
-            await page.goto(url.txt);
-
-        
-        const fullName = await page.evaluate(() => {
-            return document.querySelector('h1').innerText;
-                
-        });
-        console.log(fullName)
-        firstName = fullName.split(" ")[0]
-        await delay(10000);
-
-        let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
-
-        if (v.toLowerCase().includes('connect')){
-            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-                await page.click('div.pvs-profile-actions > button')
-
-        }else {
-            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-
-            await delay(5000);
-            // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
-            // console.log(b)
-
-            // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
-            const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
-            for await (const element of elements) {
-                await delay(5000);
-                await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-                await delay(5000);
-
-                await element.click();
-            }
-        }
-        await page.click('[aria-label="Add a note"]')
-
-        await delay(5000);
-
-        await page.type('[name="message"]',`Hello ${firstName},\nI recently came across your profile on LinkedIn and was amazed by your experience and background.\nWill you be available to speak with me for 10 minutes about your career path? \nThank You,\nKenneth
-        `);
-        await delay(5000);
-
-        await page.click('[aria-label="Send now"]')
-        }
+    //     await page.click('[aria-label="Send now"]')
+    //     }
     }
 
 
