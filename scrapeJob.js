@@ -7,25 +7,27 @@ function delay(time) {
 		setTimeout(resolve, time)
 	});
 }
+// remote:https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=50
+// new york:https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=0
 
 (async () => {
 	const browser = await puppeteer.launch();
 	const page = await browser.newPage();
 	//Retrieve amount of new job
-	await page.goto('https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=0');
+	// await page.goto('https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=0');
 
-	const amountOfJob = await page.evaluate(() => {
-        const baseCard = document.querySelector('.base-serp-page').querySelector('.base-serp-page__content').querySelector('#main-content').querySelector('.results-context-header').querySelector('.results-context-header__context').querySelector('span').innerText;
-        return baseCard;
-    })
-    await console.log(amountOfJob);
-
+	// const amountOfJob = await page.evaluate(() => {
+    //     const baseCard = document.querySelector('.base-serp-page').querySelector('.base-serp-page__content').querySelector('#main-content').querySelector('.results-context-header').querySelector('.results-context-header__context').querySelector('span').innerText;
+    //     return baseCard;
+    // })
+    // await console.log(amountOfJob);
+	const amountOfJob = 900;
 	let pages = await Math.floor(Number(amountOfJob)/25);
 	//scrape job posting
 	for (let i = 0; i < pages; i++) {
 		console.log(`page: ${i}`)
 		const page = await browser.newPage();
-		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?distance=25&f_PP=102571732%2C104361728&f_TPR=r432000&geoId=90000070&keywords=Software%2BEngineer&start=${i*25}`);
+		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=${i*25}`);
 
 		await delay(5000);
 		const quotes = await page.evaluate(() => {
@@ -42,7 +44,8 @@ function delay(time) {
 		
 					const datetime = information.querySelector('.base-search-card__metadata').querySelector('time').getAttribute('datetime');
 					const checkFor = ['senior', 'staff', 'sr', 'founding', 'data', 'machine', 'ai', 'java', 'c++', 'cloud', 'it', 
-										'net','lead','manager','qa','ios', 'android','data','security','office','site','business']
+										'net','lead','manager','qa','ios', 'android','data','security','office','site','business','Solutions','mobile',
+									'principal']
 		
 					const hasSome = checkFor.some(word => jobTitle.toLowerCase().includes(word))
 					if (hasSome){

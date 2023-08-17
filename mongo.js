@@ -29,7 +29,7 @@ yourModule.mongodbInsert=async(jobTitle,link,company,datetime)=>{
 
 async function addListing(client, newListing, company){
     // See https://mongodb.github.io/node-mongodb-native/3.6/api/Collection.html#insertOne for the insertOne() docs
-    const result = await client.db("sample_linkedin").collection("listings").replaceOne(
+    const result = await client.db("linkedin").collection("listings").replaceOne(
         {
             company : company
         },
@@ -44,7 +44,7 @@ yourModule.mongodbFind=async()=>{
     
     try {
         await client.connect();
-        const lists = await client.db("sample_linkedin")
+        const lists = await client.db("linkedin")
         return {client, lists};
     } catch (e) {
         console.log(e)

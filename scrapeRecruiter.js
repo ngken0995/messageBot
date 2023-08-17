@@ -15,10 +15,10 @@ let actions={};
 actions.sendMessage=async(page,companyUrl,searchName)=>{
     await page.goto(companyUrl);
     const companyMission = await page.evaluate(() => {
-        return document.querySelector('h1').innerText;
+        return document.querySelector('div.org-top-card-summary-info-list__info-item').innerText;
             
     });
-    if (companyMission.toLowerCase().includes('recruiting')){
+    if (companyMission.toLowerCase().includes('recruiting') ||companyMission.toLowerCase().includes('consulting')){
         return;
     }
     await utils.linkedinPeoplePage(page);
@@ -64,32 +64,35 @@ actions.sendMessage=async(page,companyUrl,searchName)=>{
         await delay(10000);
 
         let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
-        await page.keyboard.press('ArrowDown');
-        await page.keyboard.press('ArrowDown');
-        await page.keyboard.press('ArrowDown');
-        await page.keyboard.press('ArrowDown');
+
         if (v.toLowerCase().includes('connect')){
             //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-                await page.click('div.pvs-profile-actions > button')
+            await page.click('div.pvs-profile-actions > button')
 
         }else {
+            await delay(4000);
             //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-            await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+            await page.click('div.pvs-profile-actions > div.artdeco-dropdown > button');
+            await delay(4000);
+            await page.keyboard.press('ArrowDown');
+            await page.keyboard.press('ArrowDown');
+            await page.keyboard.press('ArrowDown');
+            await page.keyboard.press('Enter');
 
-            await delay(5000);
-            // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
-            // console.log(b)
+            // await delay(5000);
+            // // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
+            // // console.log(b)
 
-            // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
-            const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
-            for await (const element of elements) {
-                await delay(5000);
-                await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-                await delay(5000);
+            // // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
+            // const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
+            // for await (const element of elements) {
+            //     await delay(5000);
+            //     await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
+            //     await delay(5000);
 
-                await element.click();
+            //     await element.click();
             }
-        }
+        await delay(4000);
         await page.click('[aria-label="Add a note"]')
 
         await delay(5000);
@@ -102,7 +105,7 @@ actions.sendMessage=async(page,companyUrl,searchName)=>{
 }
 
 (async () => {
-	const browser = await puppeteer.launch({headless: false});
+	const browser = await puppeteer.launch({headless: false,defaultViewport: null});
 	const page = await browser.newPage();
 	await page.goto('https://www.linkedin.com');
     await delay(5000);
@@ -125,118 +128,43 @@ actions.sendMessage=async(page,companyUrl,searchName)=>{
     //To Do: figure out how to loop through 5 unvisited companies.
     
     i = 0
-    let jobLists = [];
 
-    while (i < 1) {
+    while (i < 5) {
         for await (const doc of lists) {
+            if (i === 5) {
+                break;
+            }
             if (doc.reachedOut == false) {
                 let link = doc.link;
-                jobLists.push(link);
                 i = i  + 1;
+                await page.goto(link);
+                await delay(4000);
+                const companyUrl = await page.evaluate(() => {
+                    const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
+        
+                    return baseList.querySelector('a').getAttribute('href');
+                            
+                });
+                await actions.sendMessage(page,companyUrl,'recruiter');
+                await actions.sendMessage(page,companyUrl,'software engineer');
                 await db.lists.collection('listings').updateOne({'company':`${doc.company}`},{$set:{'reachedOut':true}})
-            }
-            
-            if (i === 1) {
-                break;
             }
         }
     }
     
 
-    for await(const jobUrl of jobLists) {
-        await page.goto(jobUrl);
-        await delay(4000);
-        const companyUrl = await page.evaluate(() => {
-            const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
+    // for await(const jobUrl of jobLists) {
+    //     await page.goto(jobUrl);
+    //     await delay(4000);
+    //     const companyUrl = await page.evaluate(() => {
+    //         const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
 
-            return baseList.querySelector('a').getAttribute('href');
+    //         return baseList.querySelector('a').getAttribute('href');
                     
-        });
-        await actions.sendMessage(page,companyUrl,'recruiter');
-        await actions.sendMessage(page,companyUrl,'software engineer');
-    //     await page.goto(companyUrl);
-
-    //     await utils.linkedinPeoplePage(page);
-
-    //     await delay(10000);
-    //     const searchEmployee = await page.$('[id="people-search-keywords"]');
-    //     await searchEmployee.click();
-    
-    //     await searchEmployee.type('Software Engineer');
-    
-    //     await page.keyboard.press('Enter');
-    
-    //     await delay(5000);    
-        
-    //     //collect recruiter url
-    //     const engineerUrls = await page.evaluate(() => {
-    //         const tds = Array.from(document.querySelectorAll('li'))
-    //         return tds.flatMap(td => {
-
-    //             try{
-    //                 var txt = td.querySelector('div').querySelector('section').querySelector('div').querySelector('div').querySelector('div').querySelector('a').getAttribute('href');
-    //                 return {txt}
-    //             } catch {
-    //                 return [];
-    //             }
-    //             });
     //     });
-
-    //     //connect and send message
-
-    //     await delay(5000);
-    //     console.log(engineerUrls);
-    //     for await (const url of engineerUrls) {
-    //         await page.goto(url.txt);
-
-        
-    //     const fullName = await page.evaluate(() => {
-    //         return document.querySelector('h1').innerText;
-                
-    //     });
-    //     console.log(fullName)
-    //     firstName = fullName.split(" ")[0]
-    //     await delay(10000);
-
-    //     let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
-
-    //     if (v.toLowerCase().includes('connect')){
-    //         //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-    //             await page.click('div.pvs-profile-actions > button')
-
-    //     }else {
-    //         //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
-    //         await page.keyboard.press('ArrowDown');
-    //         await page.keyboard.press('ArrowDown');
-    //         await page.keyboard.press('ArrowDown');
-    //         await page.keyboard.press('ArrowDown');
-    //         await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-
-    //         await delay(5000);
-    //         // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
-    //         // console.log(b)
-
-    //         // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
-    //         const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
-    //         for await (const element of elements) {
-    //             await delay(5000);
-    //             await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-    //             await delay(5000);
-
-    //             await element.click();
-    //         }
-    //     }
-    //     await page.click('[aria-label="Add a note"]')
-
-    //     await delay(5000);
-
-    //     await page.type('[name="message"]',`Hello ${firstName},\nI recently came across your profile on LinkedIn and was amazed by your experience and background.\nWill you be available to speak with me for 10 minutes about your career path? \nThank You,\nKenneth
-    //     `);
-    //     await delay(5000);
-
-    //     await page.click('[aria-label="Send now"]')
-    //     }
-    }
+    //     await actions.sendMessage(page,companyUrl,'recruiter');
+    //     await actions.sendMessage(page,companyUrl,'software engineer');
+    // }
 
 
 
