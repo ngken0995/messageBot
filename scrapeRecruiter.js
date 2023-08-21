@@ -126,7 +126,7 @@ actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
     
     //look up company
     const db = await yourModule.mongodbFind();
-    const lists = await db.lists.collection('listings').find();
+    const lists = await db.lists.collection('listings').find().sort( { datetime: -1 } );
     //To Do: figure out how to loop through 5 unvisited companies.
     
     i = 0

@@ -8,7 +8,7 @@ function delay(time) {
 	});
 }
 // remote:https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=50
-// new york:https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=0
+// new york:https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&locationId=&geoId=90000070&f_TPR=r604800&f_PP=102571732&start=200
 
 (async () => {
 	const browser = await puppeteer.launch();
@@ -27,7 +27,7 @@ function delay(time) {
 	for (let i = 0; i < pages; i++) {
 		console.log(`page: ${i}`)
 		const page = await browser.newPage();
-		await page.goto(`https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=${i*25}`);
+		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=${i*25}`);
 
 		await delay(5000);
 		const quotes = await page.evaluate(() => {
@@ -43,15 +43,20 @@ function delay(time) {
 					const company = information.querySelector('.base-search-card__subtitle').querySelector('a').innerText;
 		
 					const datetime = information.querySelector('.base-search-card__metadata').querySelector('time').getAttribute('datetime');
-					const checkFor = ['senior', 'staff', 'sr', 'founding', 'data', 'machine', 'ai', 'java', 'c++', 'cloud', 'it', 
+					const doesNotInclude = ['senior', 'staff', 'sr', 'founding', 'data', 'machine', 'ai', 'java', 'c++', 'cloud', 'it', 
 										'net','lead','manager','qa','ios', 'android','data','security','office','site','business','solutions','mobile',
-									'principal']
-		
-					const hasSome = checkFor.some(word => jobTitle.toLowerCase().includes(word))
+									'principal', 'system']
+					const isInJobTitle = ['stack','full','back','front','software']
+					const hasSome = doesNotInclude.some(word => jobTitle.toLowerCase().includes(word))
+					const mustBeInTitle = isInJobTitle.some(word => jobTitle.toLowerCase().includes(word))
 					if (hasSome){
 						return [];
 					} else {
-						return {jobTitle, link, company, datetime};
+						if (mustBeInTitle) {
+							return {jobTitle, link, company, datetime};
+						} else {
+							return [];
+						}
 					}
 				} catch {
 					return [];
