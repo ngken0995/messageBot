@@ -12,7 +12,7 @@ function delay(time) {
 
 let actions={};
 
-actions.sendMessage=async(page,companyUrl,searchName)=>{
+actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
     await page.goto(companyUrl);
     const companyMission = await page.evaluate(() => {
         return document.querySelector('div.org-top-card-summary-info-list__info-item').innerText;
@@ -51,7 +51,11 @@ actions.sendMessage=async(page,companyUrl,searchName)=>{
 
     await delay(5000);
     console.log(engineerUrls);
+    let i = 0;
     for await (const url of engineerUrls) {
+        if (i === amount) {
+            break;
+        }
         await page.goto(url.txt);
 
     
@@ -79,28 +83,26 @@ actions.sendMessage=async(page,companyUrl,searchName)=>{
             await page.keyboard.press('ArrowDown');
             await page.keyboard.press('Enter');
 
-            // await delay(5000);
-            // // let b = await page.$eval('div.pvs-profile-actions> div.artdeco-dropdown > div > div > ul > li > div)', element=> element.getAttribute("aria-label"))
-            // // console.log(b)
-
-            // // await page.$$eval('a.cls-context-menu-link', links => links.forEach(link => link.click()))
-            // const elements = await page.$$(`div[aria-label="Invite ${fullName} to connect"]`);
-            // for await (const element of elements) {
-            //     await delay(5000);
-            //     await page.click('div.pvs-profile-actions > div.artdeco-dropdown');
-            //     await delay(5000);
-
-            //     await element.click();
             }
         await delay(4000);
+        try{
+            await page.waitForSelector('[aria-label="Add a note"]');
+        } catch {
+            break;
+        }
         await page.click('[aria-label="Add a note"]')
 
         await delay(5000);
-
-        await page.type('[name="message"]',`Hello ${firstName},\nI\'m Kenneth Ng, a software engineer and thought you might be able to connect me with the recruiter who is responsible for a Software Engineer role.\nI consider myself to be an engineer who has the skills to succeed. Would you be open to connecting me to the right person?\nBest,\nKenneth`);
+        if(searchName==='recruiter'){
+            await page.type('[name="message"]',`Hello ${firstName},\nI\'m Kenneth Ng, a software engineer and thought you might be able to connect me with the recruiter who is responsible for a Software Engineer role.\nI consider myself to be an engineer who has the skills to succeed. Would you be open to connecting me to the right person?\nBest,\nKenneth`);
+        } else {
+            await page.type('[name="message"]',`Hello ${firstName},\nI recently came across your profile on LinkedIn and was amazed by your experience and background.\nWill you be available to speak with me for 10 minutes about your career path? \nThank You,\nKenneth`);
+        }
         await delay(5000);
 
         await page.click('[aria-label="Send now"]')
+
+        i=i+1;
     }
 }
 
@@ -145,8 +147,8 @@ actions.sendMessage=async(page,companyUrl,searchName)=>{
                     return baseList.querySelector('a').getAttribute('href');
                             
                 });
-                await actions.sendMessage(page,companyUrl,'recruiter');
-                await actions.sendMessage(page,companyUrl,'software engineer');
+                await actions.sendMessage(page,companyUrl,'recruiter',3);
+                await actions.sendMessage(page,companyUrl,'software engineer',5);
                 await db.lists.collection('listings').updateOne({'company':`${doc.company}`},{$set:{'reachedOut':true}})
             }
         }

@@ -27,7 +27,7 @@ function delay(time) {
 	for (let i = 0; i < pages; i++) {
 		console.log(`page: ${i}`)
 		const page = await browser.newPage();
-		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=${i*25}`);
+		await page.goto(`https://www.linkedin.com/jobs/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&geoId=90000070&f_TPR=r432000&f_PP=102571732&position=23&pageNum=${i*25}`);
 
 		await delay(5000);
 		const quotes = await page.evaluate(() => {
@@ -44,7 +44,7 @@ function delay(time) {
 		
 					const datetime = information.querySelector('.base-search-card__metadata').querySelector('time').getAttribute('datetime');
 					const checkFor = ['senior', 'staff', 'sr', 'founding', 'data', 'machine', 'ai', 'java', 'c++', 'cloud', 'it', 
-										'net','lead','manager','qa','ios', 'android','data','security','office','site','business','Solutions','mobile',
+										'net','lead','manager','qa','ios', 'android','data','security','office','site','business','solutions','mobile',
 									'principal']
 		
 					const hasSome = checkFor.some(word => jobTitle.toLowerCase().includes(word))
