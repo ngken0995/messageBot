@@ -8,7 +8,8 @@ function delay(time) {
 	});
 }
 // remote:https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=50
-// new york:https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&locationId=&geoId=90000070&f_TPR=r604800&f_PP=102571732&start=200
+// new york:
+//https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&locationId=&geoId=90000070&f_TPR=r604800&f_PP=102571732&start=
 
 (async () => {
 	const browser = await puppeteer.launch();
@@ -27,7 +28,7 @@ function delay(time) {
 	for (let i = 0; i < pages; i++) {
 		console.log(`page: ${i}`)
 		const page = await browser.newPage();
-		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?currentJobId=3691620322&f_TPR=r604800&f_WT=2&keywords=software%20engineer&refresh=true&start=${i*25}`);
+		await page.goto(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=Software%2BEngineer&location=New%2BYork%2BCity%2BMetropolitan%2BArea&locationId=&geoId=90000070&f_TPR=r604800&f_PP=102571732&start=${i*25}`);
 
 		await delay(5000);
 		const quotes = await page.evaluate(() => {
