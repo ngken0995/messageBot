@@ -123,59 +123,32 @@ actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
     await btn.click();
 
     await delay(15000);
-    
-    //look up company
-    const db = await yourModule.mongodbFind();
-    const lists = await db.lists.collection('listings').find().sort( { datetime: -1 } );
-    //To Do: figure out how to loop through 5 unvisited companies.
-    
-    i = 0
+    await page.goto("https://www.linkedin.com/my-items/saved-jobs/");
+    await delay(5000);
 
-    while (i < 10) {
-        for await (const doc of lists) {
-            if (i === 10) {
-                break;
-            }
-            if (doc.reachedOut == false) {
-                let link = doc.link;
-                i = i  + 1;
-                await page.goto(link);
-                await delay(4000);
-                const companyUrl = await page.evaluate(() => {
-                    const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
-        
-                    return baseList.querySelector('a').getAttribute('href');
-                            
-                });
-                await actions.sendMessage(page,companyUrl,'recruiter',3);
-                await actions.sendMessage(page,companyUrl,'software engineer',5);
-                await db.lists.collection('listings').updateOne({'company':`${doc.company}`},{$set:{'reachedOut':true}})
-            }
-        }
-    }
-    
+    await page.waitForSelector('[class="entity-result__item"]')
+    await page.click('[class="entity-result__item"]')
+    const companyUrl = await page.evaluate(() => {
+        const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
 
-    // for await(const jobUrl of jobLists) {
-    //     await page.goto(jobUrl);
-    //     await delay(4000);
-    //     const companyUrl = await page.evaluate(() => {
-    //         const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
+        return baseList.querySelector('a').getAttribute('href');
+                
+    });
+    await actions.sendMessage(page,companyUrl,'recruiter',3);
+    await actions.sendMessage(page,companyUrl,'software engineer',5);
+    await page.goto("https://www.linkedin.com/my-items/saved-jobs/");
 
-    //         return baseList.querySelector('a').getAttribute('href');
-                    
-    //     });
-    //     await actions.sendMessage(page,companyUrl,'recruiter');
-    //     await actions.sendMessage(page,companyUrl,'software engineer');
-    // }
+    await page.click('[class="entity-result__actions-overflow-menu-dropdown"]')
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
 
-
-
-    
     await delay(10000);
     await page.screenshot({
         path: 'shot.jpg'
     });
-    await db.client.close();
     await browser.close();
 
 })();
