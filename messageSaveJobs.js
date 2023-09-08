@@ -14,13 +14,6 @@ let actions={};
 
 actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
     await page.goto(companyUrl);
-    const companyMission = await page.evaluate(() => {
-        return document.querySelector('div.org-top-card-summary-info-list__info-item').innerText;
-            
-    });
-    if (companyMission.toLowerCase().includes('recruiting') ||companyMission.toLowerCase().includes('consulting')){
-        return;
-    }
     await utils.linkedinPeoplePage(page);
 
     await delay(10000);
@@ -58,7 +51,7 @@ actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
         }
         await page.goto(url.txt);
 
-    
+        await delay(5000);
         const fullName = await page.evaluate(() => {
             return document.querySelector('h1').innerText;
                 
@@ -126,24 +119,34 @@ actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
     await page.goto("https://www.linkedin.com/my-items/saved-jobs/");
     await delay(5000);
 
-    await page.waitForSelector('[class="entity-result__item"]')
-    await page.click('[class="entity-result__item"]')
-    const companyUrl = await page.evaluate(() => {
-        const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
+    while (await page.waitForSelector('[class="entity-result__item"]')){
+        await page.click('[class="entity-result__item"]')
+        await delay(5000);
 
-        return baseList.querySelector('a').getAttribute('href');
-                
-    });
-    await actions.sendMessage(page,companyUrl,'recruiter',3);
-    await actions.sendMessage(page,companyUrl,'software engineer',5);
-    await page.goto("https://www.linkedin.com/my-items/saved-jobs/");
+        const companyUrl = await page.evaluate(() => {
+            const baseList = document.querySelector('.jobs-unified-top-card__primary-description');
 
-    await page.click('[class="entity-result__actions-overflow-menu-dropdown"]')
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
+            return baseList.querySelector('a').getAttribute('href');
+                    
+        });
+
+        await delay(5000);
+        await actions.sendMessage(page,companyUrl,'recruiter',3);
+        await delay(5000);
+
+        await actions.sendMessage(page,companyUrl,'software engineer',5);
+        await page.goto("https://www.linkedin.com/my-items/saved-jobs/");
+        await delay(5000);
+        await page.click('[class="entity-result__actions-overflow-menu-dropdown"]')
+        await delay(5000);
+
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('Enter');
+        await delay(5000);
+    }
 
     await delay(10000);
     await page.screenshot({
