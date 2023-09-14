@@ -1,6 +1,5 @@
 const puppeteer = require('puppeteer');
 const {getLinkedinUsername, getLinkedinPassword} = require('./envVariable.js');
-let yourModule = require('./mongo.js');
 let utils = require('./utils.js')
 function delay(time) {
 	return new Promise(function(resolve) { 
@@ -11,7 +10,10 @@ function delay(time) {
 
 
 let actions={};
-
+/*
+Navigate through the company linkedin page,find the neccessary amount of recruiter and 
+engineer, and send them a message to connect.
+*/
 actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
     await page.goto(companyUrl);
     await utils.linkedinPeoplePage(page);
@@ -63,12 +65,10 @@ actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
         let v = await page.$eval('div.pvs-profile-actions > button', element=> element.getAttribute("aria-label"))
 
         if (v.toLowerCase().includes('connect')){
-            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
             await page.click('div.pvs-profile-actions > button')
 
         }else {
             await delay(4000);
-            //await page.$eval('div.pvs-profile-actions > div.artdeco-dropdown', element=> element.scrollIntoView());
             await page.click('div.pvs-profile-actions > div.artdeco-dropdown > button');
             await delay(4000);
             await page.keyboard.press('ArrowDown');
@@ -98,7 +98,10 @@ actions.sendMessage=async(page,companyUrl,searchName,amount)=>{
         i=i+1;
     }
 }
-
+/*
+Login to linkedin, navigate to saved job page, and automate the process to message a specific
+amount of recruiter and engineer. Lastly, remove the job posting and select the new populated saved job. 
+*/
 (async () => {
 	const browser = await puppeteer.launch({headless: false,defaultViewport: null});
 	const page = await browser.newPage();
